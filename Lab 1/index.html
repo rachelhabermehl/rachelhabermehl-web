@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8' />
+    <title>Whistler Hikes</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+      body { 
+        margin: 0; 
+        padding: 0; 
+      }
+      #map { 
+        position: absolute; 
+        top: 0; 
+        bottom: 0; 
+        width: 100%; 
+      }
+      
+    </style>
+  </head>
+  <body>
+
+    <style type="text/css">
+        #info {
+            display: block;
+            position: relative;
+            margin: 0px auto;
+            width: 30%;
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+            font:
+            12px/20px 'Helvetica Neue',
+            Arial,
+            Helvetica,
+            sans-serif;
+            font-size: 18px;
+            text-align: center;
+            color: #222;
+            background: #fff;
+        }
+    </style>
+
+<style>
+    .legend {
+        background-color: #fff;
+        border-radius: 3px;
+        bottom: 30px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        font:
+            12px/20px 'Helvetica Neue',
+            Arial,
+            Helvetica,
+            sans-serif;
+        padding: 10px;
+        position: absolute;
+        right: 10px;
+        z-index: 1;
+    }
+
+    .legend h4 {
+        margin: 0 0 10px;
+    }
+
+    .legend div span {
+        border-radius: 50%;
+        display: inline-block;
+        height: 10px;
+        margin-right: 5px;
+        width: 10px;
+    }
+</style>
+
+
+    <div id='map'></div>
+
+    <div id="whistler-legend" class="legend">
+        <h4>Features</h4>
+        <div><span style="background-color: #644cc2"></span>Hiking Trails</div>
+        <div><span style="background-color: #000000"></span>Gondolas</div>
+        <div><span style="background-color: #e79418"></span>Free Parking</div>
+    </div>
+
+    <pre id="info"></pre>
+    <script>
+    // The value for 'accessToken' begins with 'pk...'
+    mapboxgl.accessToken = 'pk.eyJ1IjoicmFjaGVsaGFiZXJtZWhsIiwiYSI6ImNrcGVqams1djFvMWYycGxhZm9iZGlnb3MifQ.4AtgFqfYiv3yISlF4P52uA'; 
+    const map = new mapboxgl.Map({
+      container: 'map',
+      // Replace YOUR_STYLE_URL with your style URL.
+      style: 'mapbox://styles/rachelhabermehl/cltbzski300mw01o8bgzxamm4', 
+      center: [-122.9539600, 50.05817000],
+      zoom: 10.8
+    });
+    
+    const whistlerLegendEl = document.getElementById('whistler-legend');
+        map.on('load', () => {
+            // Layer
+            map.addLayer({
+                'id': 'whistler-layer',
+                'type': 'fill',
+                'paint': {
+                    'fill-color': '#f00',  // Adjust based on your layer style
+                    'fill-opacity': 0.75
+                }
+            });
+        });
+    
+
+    document.getElementById('info').innerHTML = "Whistler Hikes";
+
+    </script>
+  </body>
+</html>
