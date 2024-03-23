@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8' />
+    <title>Ironman Races</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+      body { 
+        margin: 0; 
+        padding: 0; 
+      }
+
+      #map { 
+        position: absolute; 
+        top: 0; 
+        bottom: 0; 
+        width: 100%; 
+      }
+
+      .legend {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color:aliceblue;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .legend-item {
+        margin-bottom: 5px;
+    }
+
+    .ironman-text {
+        color: red;
+    }
+
+    .ironman703-text {
+        color: black;
+    }
+
+      #map-title {
+        position: absolute; 
+        top: 10px; 
+        left: 10px; 
+        z-index: 1; 
+        background-color:aliceblue;
+        padding: 10px; 
+        border-radius: 5px;
+        font-size: 16px; 
+        font-weight: bold;
+      }
+
+      #map-description {
+        position: absolute; 
+        top: 65px; 
+        left: 10px; 
+        z-index: 1; 
+        background-color: aliceblue;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        max-width: 365px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <h1 id='map-title'>North American Ironman Races 2024</h1>
+    <div id='map-description'>
+        <p><strong>Check out this year's Ironman races across North America!</strong> </p>
+            <p>The Ironman in red consists of a 3.86 km 
+            (2.4 mi) swim, a 180.25 km (112 mi) bike, 
+            and a 42.2 km (26.2 mi) run. <br> The Ironman 
+            70.3, also known as a Half Ironman, in 
+            black consists of a 1.93 km (1.2 mi) swim, 
+            a 90.12 km (56 mi) bike, and a 21.09 km (13.1 mi) run. </p>
+        <p> Click on a point to learn when the race is. Click elsewhere on the map to return to regular view.</p>
+    </div>
+    <div id='map'></div>
+    <div class="legend">
+        <div class="legend-item"><span class="ironman-text">Ironman</span></div>
+        <div class="legend-item"><span class="ironman703-text">Ironman 70.3</span></div>
+      </div>
+    <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoicmFjaGVsaGFiZXJtZWhsIiwiYSI6ImNrcGVqams1djFvMWYycGxhZm9iZGlnb3MifQ.4AtgFqfYiv3yISlF4P52uA'; 
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/rachelhabermehl/cltvz9b7q01pa01oiarqv2g71', 
+      center: [-97, 41],
+      zoom: 3.25
+    });
+
+    /* 
+    Add an event listener that runs
+    when a user clicks on the map element.
+    */
+   map.on('click', (event) => {
+    // If the user clicked on one of your markers, get its information.
+    const features = map.queryRenderedFeatures(event.point, {
+        layers: ['ironman'] // replace with your layer name
+    });
+    if (features.length) {
+        map.flyTo({
+            center: features[0].geometry.coordinates, 
+            zoom: 12
+        });
+
+        /* 
+    Create a popup, specify its options 
+    and properties, and add it to the map.
+    */
+   const popup = new mapboxgl.Popup({ offset: [0, -15] })
+   .setLngLat(features[0].geometry.coordinates)
+   .setHTML(
+    `<h3>${features[0].properties.Name}</h3>
+    <p>${features[0].properties.RaceType}
+        ${features[0].properties.Date}</p>`
+        )
+        .addTo(map);
+    } else {
+        map.flyTo({
+            center: [-97, 41], 
+            zoom: 3.25
+        });
+    }
+
+});
+
+    </script>
+  </body>
+</html>
+
+    </script>
+  </body>
+</html>
