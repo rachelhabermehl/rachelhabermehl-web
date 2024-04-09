@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8' />
+  <title>Everest Glacier Retreat</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1' />
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.css' rel='stylesheet' />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Kalam';
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 20px;
+      line-height: 30px;
+    }
+
+    h2 {
+      font-size: 14px;
+      line-height: 20px;
+      margin-bottom: 10px;
+    }
+
+    a {
+      text-decoration: none;
+      color: #2dc4b2;
+    }
+
+    #console {
+      position: absolute;
+      width: 240px;
+      margin: 10px;
+      padding: 10px 20px;
+      background-color: white;
+    }
+
+    .session {
+      margin-bottom: 20px;
+    }
+
+    .row {
+      height: 12px;
+      width: 100%;
+    }
+
+    .colors {
+      background: linear-gradient(to right, #120a8f, #214fc6, #318ce7, #87cefa);
+      margin-bottom: 5px;
+    }
+
+    .label {
+      width: 23%;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .distance-container {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1;
+    }
+
+    .distance-container>* {
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      font-size: 11px;
+      line-height: 18px;
+      display: block;
+      margin: 0;
+      padding: 5px 10px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id='map'></div>
+  <div id='distance' class='distance-container'></div>
+
+  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+
+  <div id='console'>
+    <h1>Mount Everest Glacier Retreat</h1>
+    <p>Welcome back to Mount Everest! This mountain, adored by many, is in danger due to climate change. 
+      The glacier has shrunk significantly in the past 50 years. Use this map to explore the glacier extent 
+      over the last 50 years, using the hiking trail and points of interest to understand where you are.
+      Try turning on all layers and clicking on the map to bring up the measure tool which can be used to 
+      measure the size of the glacier and shrinkage over time. 
+    </p>
+
+    <div class='session'>
+      <h2>Glacier Year</h2>
+      <div class='row colors'>
+      </div>
+      <div class='row labels'>
+        <div class='label'>1980</div>
+        <div class='label'>1990</div>
+        <div class='label'>2000</div>
+        <div class='label'>2010</div>
+      </div>
+
+      <div class='session' id='sliderbar'>
+        <h2>Year: <label id='active-year'>1980</label></h2>
+        <input id='slider' class='row' type='range' min='1980' max='2010' step='10' value='1980' />
+      </div>
+
+      <div class='session'>
+        <h2>All Years</h2>
+        <div class='row' id='filters'>
+          <input id='all' type='radio' name='toggle' value='all'>
+          <label for='all'>Show All</label>
+          <input id='none' type='radio' name='toggle' value='none'>
+          <label for='none'>Remove All</label>
+        </div>
+      </div>
+
+      <script>
+        // The value for 'accessToken' begins with 'pk...'
+        mapboxgl.accessToken = 'pk.eyJ1IjoicmFjaGVsaGFiZXJtZWhsIiwiYSI6ImNrcGVqams1djFvMWYycGxhZm9iZGlnb3MifQ.4AtgFqfYiv3yISlF4P52uA';
+        const map = new mapboxgl.Map({
+          container: 'map',
+          // Replace YOUR_STYLE_URL with your style URL.
+          style: 'mapbox://styles/rachelhabermehl/cluiqkfy400pp01rad734bnc5',
+          center: [86.88, 27.989],
+          zoom: 13
+        });
+
+        map.on('load', () => {
+          map.addSource('glacier-1980-geojson', {
+            type: 'geojson',
+            // Use a URL for the value for the `data` property.
+            data: 'Glacier_1980.geojson'
+          });
+
+          map.addLayer({
+            'id': 'glacier-1980',
+            'type': 'fill',
+            'source': 'glacier-1980-geojson',
+            'layout': {
+              'visibility': 'visible'
+            },
+            'paint': {
+              'fill-color': '#120a8f',
+            }
+          });
+        });
+
+        map.on('load', () => {
+          map.addSource('glacier-1990-geojson', {
+            type: 'geojson',
+            // Use a URL for the value for the `data` property.
+            data: 'Glacier_1990.geojson'
+          });
+
+          map.addLayer({
+            'id': 'glacier-1990',
+            'type': 'fill',
+            'source': 'glacier-1990-geojson',
+            'layout': {
+              'visibility': 'none' // initially hide this layer
+            },
+            'paint': {
+              'fill-color': '#214fc6',
+            }
+          });
+        });
+
+        map.on('load', () => {
+          map.addSource('glacier-2000-geojson', {
+            type: 'geojson',
+            // Use a URL for the value for the `data` property.
+            data: 'Glacier_2000.geojson'
+          });
+
+          map.addLayer({
+            'id': 'glacier-2000',
+            'type': 'fill',
+            'source': 'glacier-2000-geojson',
+            'layout': {
+              'visibility': 'none'
+            },
+            'paint': {
+              'fill-color': '#318ce7',
+            }
+          });
+        });
+
+        map.on('load', () => {
+          map.addSource('glacier-2010-geojson', {
+            type: 'geojson',
+            // Use a URL for the value for the `data` property.
+            data: 'Glacier_2010.geojson'
+          });
+
+          map.addLayer({
+            'id': 'glacier-2010',
+            'type': 'fill',
+            'source': 'glacier-2010-geojson',
+            'layout': {
+              'visibility': 'none'
+            },
+            'paint': {
+              'fill-color': '#87cefa',
+            }
+          });
+        });
+
+        map.on('load', () => {
+          map.addSource('hiking-route-geojson', {
+            type: 'geojson',
+            data: 'Hiking_Route_Geo.geojson'
+          });
+
+          map.addLayer({
+            'id': 'hiking-route',
+            'type': 'line',
+            'source': 'hiking-route-geojson',
+            'layout': {
+              'visibility': 'visible'
+            },
+            'paint': {
+              'line-color': '#ff8c00',
+              'line-width': 3
+            }
+          });
+        });
+
+        map.on('load', () => {
+          map.addSource('everest-poi-geojson', {
+            type: 'geojson',
+            data: 'Everest_POI.geojson'
+          });
+
+          map.addLayer({
+            'id': 'everest-poi-geojson',
+            'type': 'symbol',
+            'source': 'everest-poi-geojson',
+            'layout': {
+              'icon-image': 'marker',
+              'text-field': ['get', 'Name'],
+              'text-font': ['Open Sans Semibold','Arial Unicode MS Bold'],
+              'text-offset': [0, 0.3],
+              'text-anchor': 'top'
+            },
+            'paint':{ 
+              'text-color': 'white',
+              'text-halo-color': 'black',
+              'text-halo-width': 1.5
+            }
+          });
+        });
+
+        const distanceContainer = document.getElementById('distance');
+
+        // GeoJSON object to hold our measurement features
+        const geojson = {
+          'type': 'FeatureCollection',
+          'features': []
+        };
+
+        // Used to draw a line between points
+        const linestring = {
+          'type': 'Feature',
+          'geometry': {
+            'type': 'LineString',
+            'coordinates': []
+          }
+        };
+
+        map.on('load', () => {
+          map.addSource('geojson', {
+            'type': 'geojson',
+            'data': geojson
+          });
+
+          // Add styles to the map
+          map.addLayer({
+            id: 'measure-points',
+            type: 'circle',
+            source: 'geojson',
+            paint: {
+              'circle-radius': 5,
+              'circle-color': '#000'
+            },
+            filter: ['in', '$type', 'Point']
+          });
+
+          map.addLayer({
+            id: 'measure-lines',
+            type: 'line',
+            source: 'geojson',
+            layout: {
+              'line-cap': 'round',
+              'line-join': 'round'
+            },
+            paint: {
+              'line-color': '#000',
+              'line-width': 2.5
+            },
+            filter: ['in', '$type', 'LineString']
+          });
+
+          map.on('click', (event) => {
+            const features = map.queryRenderedFeatures(event.point, {
+              layers: ['measure-points']
+            });
+
+            // Remove the linestring from the group
+            // so we can redraw it based on the points collection.
+            if (geojson.features.length > 1) geojson.features.pop();
+
+            // Clear the distance container to populate it with a new value.
+            distanceContainer.innerHTML = '';
+
+            // If a feature was clicked, remove it from the map.
+            if (features.length) {
+              const id = features[0].properties.id;
+              geojson.features = geojson.features.filter(
+                (point) => point.properties.id !== id
+              );
+            } else {
+              const point = {
+                'type': 'Feature',
+                'geometry': {
+                  'type': 'Point',
+                  'coordinates': [event.lngLat.lng, event.lngLat.lat]
+                },
+                'properties': {
+                  'id': String(new Date().getTime())
+                }
+              };
+
+              geojson.features.push(point);
+            }
+
+            if (geojson.features.length > 1) {
+              linestring.geometry.coordinates = geojson.features.map(
+                (point) => point.geometry.coordinates
+              );
+
+              geojson.features.push(linestring);
+
+              // Populate the distanceContainer with total distance
+              const value = document.createElement('pre');
+              const distance = turf.length(linestring);
+              value.textContent = `Total distance: ${distance.toLocaleString()}km`;
+              distanceContainer.appendChild(value);
+            }
+
+            map.getSource('geojson').setData(geojson);
+          });
+        });
+
+        map.on('mousemove', (event) => {
+          const features = map.queryRenderedFeatures(event.point, {
+            layers: ['measure-points']
+          });
+          // Change the cursor to a pointer when hovering over a point on the map.
+          // Otherwise cursor is a crosshair.
+          map.getCanvas().style.cursor = features.length
+            ? 'pointer'
+            : 'crosshair';
+        });
+
+
+        document.getElementById('slider').addEventListener('input', (event) => {
+          const year = parseInt(event.target.value, 10);
+
+          if (year === 1980) {
+            map.setLayoutProperty('glacier-1980', 'visibility', 'visible');
+            map.setLayoutProperty('glacier-1990', 'visibility', 'none');
+            map.setLayoutProperty('glacier-2000', 'visibility', 'none');
+            map.setLayoutProperty('glacier-2010', 'visibility', 'none');
+
+          } else if (year === 1990) {
+            map.setLayoutProperty('glacier-1980', 'visibility', 'none');
+            map.setLayoutProperty('glacier-1990', 'visibility', 'visible');
+            map.setLayoutProperty('glacier-2000', 'visibility', 'none');
+            map.setLayoutProperty('glacier-2010', 'visibility', 'none');
+          } else if (year === 2000) {
+            map.setLayoutProperty('glacier-1980', 'visibility', 'none');
+            map.setLayoutProperty('glacier-1990', 'visibility', 'none');
+            map.setLayoutProperty('glacier-2000', 'visibility', 'visible');
+            map.setLayoutProperty('glacier-2010', 'visibility', 'none');
+          } else if (year === 2010) {
+            map.setLayoutProperty('glacier-1980', 'visibility', 'none');
+            map.setLayoutProperty('glacier-1990', 'visibility', 'none');
+            map.setLayoutProperty('glacier-2000', 'visibility', 'none');
+            map.setLayoutProperty('glacier-2010', 'visibility', 'visible');
+          }
+
+          // update text in the UI
+          document.getElementById('active-year').innerText = year;
+        });
+
+        document.getElementById('all').addEventListener('change', () => {
+          map.setLayoutProperty('glacier-1980', 'visibility', 'visible');
+          map.setLayoutProperty('glacier-1990', 'visibility', 'visible');
+          map.setLayoutProperty('glacier-2000', 'visibility', 'visible');
+          map.setLayoutProperty('glacier-2010', 'visibility', 'visible');
+        });
+
+        document.getElementById('none').addEventListener('change', () => {
+          map.setLayoutProperty('glacier-1980', 'visibility', 'none');
+          map.setLayoutProperty('glacier-1990', 'visibility', 'none');
+          map.setLayoutProperty('glacier-2000', 'visibility', 'none');
+          map.setLayoutProperty('glacier-2010', 'visibility', 'none');
+        });
+
+
+      </script>
+
+</body>
+
+</html>
